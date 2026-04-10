@@ -427,10 +427,39 @@ router.put('/:id/read', authenticate, async (req, res) => {
 // ── DELETE /api/messages/expired — Cleanup expired messages ──
 router.delete('/expired', authenticate, async (req, res) => {
   try {
+    // Fetch unopened expired rows before deleting so we can notify senders.
+    const expiredRows = await pool.query(
+      `SELECT id, sender_id, recipient_id, group_id FROM messages
+       WHERE expires_at IS NOT NULL AND expires_at <= NOW() AND read = FALSE`
+    );
+
     const expiredResult = await pool.query(
       `DELETE FROM messages
        WHERE expires_at IS NOT NULL AND expires_at <= NOW() AND read = FALSE
        RETURNING id`
+    );
+
+    for (const row of expiredRows.rows) {
+      const payload = { type: 'message_expired', message_id: row.id };
+      sendToUser(row.sender_id, payload);
+      if (row.recipient_id) {
+        sendToUser(row.recipient_id, payload);
+      } else if (row.group_id) {
+        const members = await pool.query(
+          `SELECT user_id FROM group_members
+           WHERE group_id = $1 AND removed_at IS NULL`,
+          [row.group_id]
+        );
+        for (const m of members.rows) {
+          sendToUser(m.user_id, payload);
+        }
+      }
+    }
+
+    // Fetch burned messages before deleting so we can notify participants.
+    const burnedRows = await pool.query(
+      `SELECT id, sender_id, recipient_id, group_id FROM messages
+       WHERE self_destruct_at IS NOT NULL AND self_destruct_at <= NOW()`
     );
 
     const burnedResult = await pool.query(
@@ -438,6 +467,24 @@ router.delete('/expired', authenticate, async (req, res) => {
        WHERE self_destruct_at IS NOT NULL AND self_destruct_at <= NOW()
        RETURNING id`
     );
+
+    // Push { type: 'message_destroyed', message_id } to sender and recipient(s).
+    for (const row of burnedRows.rows) {
+      const payload = { type: 'message_destroyed', message_id: row.id };
+      sendToUser(row.sender_id, payload);
+      if (row.recipient_id) {
+        sendToUser(row.recipient_id, payload);
+      } else if (row.group_id) {
+        const members = await pool.query(
+          `SELECT user_id FROM group_members
+           WHERE group_id = $1 AND removed_at IS NULL`,
+          [row.group_id]
+        );
+        for (const m of members.rows) {
+          sendToUser(m.user_id, payload);
+        }
+      }
+    }
 
     return res.json({
       expired_deleted: expiredResult.rowCount,
