@@ -530,4 +530,4 @@ router.get('/:id', authenticate, async (req, res) => {
 //   const httpServer = http.createServer(app);
 //   httpServer.on('upgrade', upgradeHandler);
 //   httpServer.listen(PORT);
-module.exports = { router, wss, upgradeHandler };
+module.exports = { router, wss, upgradeHandler, sendToUser };
