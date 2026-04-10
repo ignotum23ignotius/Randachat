@@ -1,13 +1,161 @@
 const express = require('express');
 const router = express.Router();
 const { Pool } = require('pg');
+const { WebSocketServer } = require('ws');
+const jwt = require('jsonwebtoken');
 const authenticate = require('../middleware/auth');
 
 const pool = new Pool({ connectionString: process.env.DATABASE_URL });
 
 const VALID_BURN_TIMERS = [10, 30, 60, 600, 3600];
 const UNOPENED_EXPIRY_HOURS = 24;
-const IMAGE_SELF_DESTRUCT_SECONDS = 30;
+
+// ── WebSocket server ─────────────────────────────────────────
+// Created with noServer: true — not bound to a port itself.
+// server/index.js attaches it to the HTTP server by passing
+// the 'upgrade' event through upgradeHandler (exported below).
+const wss = new WebSocketServer({ noServer: true });
+
+// Map<userId, Set<WebSocket>>
+// One user can have multiple open connections (multiple tabs).
+const clients = new Map();
+
+function register(userId, ws) {
+  if (!clients.has(userId)) clients.set(userId, new Set());
+  clients.get(userId).add(ws);
+}
+
+function unregister(userId, ws) {
+  const sockets = clients.get(userId);
+  if (!sockets) return;
+  sockets.delete(ws);
+  if (sockets.size === 0) clients.delete(userId);
+}
+
+// Send a JSON payload to every open socket for a given userId.
+// Silent no-op if the user has no connected sockets.
+function sendToUser(userId, payload) {
+  const sockets = clients.get(userId);
+  if (!sockets || sockets.size === 0) return;
+  const data = JSON.stringify(payload);
+  for (const ws of sockets) {
+    if (ws.readyState === ws.OPEN) ws.send(data);
+  }
+}
+
+// ── Upgrade handler (exported for index.js) ──────────────────
+// Verifies the JWT token from the ?token= query parameter before
+// allowing the WebSocket handshake. index.js wires this up:
+//
+//   const { upgradeHandler } = require('./routes/messages');
+//   httpServer.on('upgrade', upgradeHandler);
+//
+// Token is passed by the client as:
+//   new WebSocket('ws://host/ws?token=<jwt>')
+function upgradeHandler(req, socket, head) {
+  // Only handle upgrades targeted at /ws
+  const { pathname, searchParams } = new URL(
+    req.url,
+    `http://${req.headers.host}`
+  );
+  if (pathname !== '/ws') {
+    socket.destroy();
+    return;
+  }
+
+  const token = searchParams.get('token');
+  if (!token) {
+    socket.write('HTTP/1.1 401 Unauthorized\r\n\r\n');
+    socket.destroy();
+    return;
+  }
+
+  let payload;
+  try {
+    payload = jwt.verify(token, process.env.JWT_SECRET);
+  } catch {
+    socket.write('HTTP/1.1 401 Unauthorized\r\n\r\n');
+    socket.destroy();
+    return;
+  }
+
+  // Attach userId to req so the 'connection' handler can read it.
+  req.userId = payload.id;
+
+  wss.handleUpgrade(req, socket, head, (ws) => {
+    wss.emit('connection', ws, req);
+  });
+}
+
+// ── WebSocket connection handler ─────────────────────────────
+wss.on('connection', (ws, req) => {
+  const userId = req.userId;
+  register(userId, ws);
+
+  ws.on('message', async (raw) => {
+    let msg;
+    try {
+      msg = JSON.parse(raw);
+    } catch {
+      return; // ignore malformed frames
+    }
+
+    if (msg.type === 'typing') {
+      await handleTyping(userId, msg);
+    }
+  });
+
+  ws.on('close', () => unregister(userId, ws));
+  ws.on('error', () => unregister(userId, ws));
+});
+
+// ── Typing indicator (WS only) ───────────────────────────────
+// Client sends:
+//   { type: 'typing', recipient_id: '<uuid>', is_typing: true }
+//   { type: 'typing', group_id: '<uuid>',     is_typing: true }
+//
+// Server pushes to the correct participants only:
+//   - DM:    push to the other participant only
+//   - Group: push to every active member except the sender
+//
+// Payload delivered to recipients:
+//   { type: 'typing', from: '<userId>', is_typing: bool,
+//     conversation: { type: 'dm'|'group', ... } }
+async function handleTyping(senderId, msg) {
+  const { recipient_id, group_id, is_typing } = msg;
+
+  if (!recipient_id && !group_id) return;
+
+  if (recipient_id) {
+    sendToUser(recipient_id, {
+      type: 'typing',
+      from: senderId,
+      is_typing: !!is_typing,
+      conversation: { type: 'dm', partner_id: senderId }
+    });
+    return;
+  }
+
+  // Group: resolve active members from DB, push to each (except sender)
+  try {
+    const result = await pool.query(
+      `SELECT user_id FROM group_members
+       WHERE group_id = $1 AND removed_at IS NULL AND user_id != $2`,
+      [group_id, senderId]
+    );
+    const payload = {
+      type: 'typing',
+      from: senderId,
+      is_typing: !!is_typing,
+      conversation: { type: 'group', group_id }
+    };
+    for (const row of result.rows) {
+      sendToUser(row.user_id, payload);
+    }
+  } catch (err) {
+    console.error('Typing group query error:', err);
+  }
+}
 
 // ── POST /api/messages — Send a message ─────────────────────
 router.post('/', authenticate, async (req, res) => {
@@ -19,8 +167,7 @@ router.post('/', authenticate, async (req, res) => {
       encrypted_content,
       encryption_iv,
       burn_after_read = false,
-      burn_timer_seconds = null,
-      is_image = false
+      burn_timer_seconds = null
     } = req.body;
 
     // Must target exactly one: direct or group
@@ -32,7 +179,6 @@ router.post('/', authenticate, async (req, res) => {
       return res.status(400).json({ error: 'encrypted_content and encryption_iv are required' });
     }
 
-    // Validate burn timer
     if (burn_after_read && burn_timer_seconds !== null && !VALID_BURN_TIMERS.includes(burn_timer_seconds)) {
       return res.status(400).json({ error: 'burn_timer_seconds must be one of: 10, 30, 60, 600, 3600' });
     }
@@ -62,7 +208,6 @@ router.post('/', authenticate, async (req, res) => {
       }
     }
 
-    // Set expiry: 24 hours from now if unopened
     const expiresAt = new Date(Date.now() + UNOPENED_EXPIRY_HOURS * 60 * 60 * 1000);
 
     const result = await pool.query(
@@ -121,7 +266,6 @@ router.get('/conversation/:userId', authenticate, async (req, res) => {
     params.push(limit);
 
     const result = await pool.query(query, params);
-
     return res.json(result.rows);
   } catch (err) {
     console.error('Get conversation error:', err);
@@ -137,7 +281,6 @@ router.get('/group/:groupId', authenticate, async (req, res) => {
     const limit = Math.min(parseInt(req.query.limit) || 50, 200);
     const before = req.query.before || null;
 
-    // Verify membership
     const memberCheck = await pool.query(
       `SELECT id FROM group_members
        WHERE group_id = $1 AND user_id = $2 AND removed_at IS NULL`,
@@ -167,7 +310,6 @@ router.get('/group/:groupId', authenticate, async (req, res) => {
     params.push(limit);
 
     const result = await pool.query(query, params);
-
     return res.json(result.rows);
   } catch (err) {
     console.error('Get group messages error:', err);
@@ -175,7 +317,14 @@ router.get('/group/:groupId', authenticate, async (req, res) => {
   }
 });
 
-// ── PUT /api/messages/:id/read — Mark as read (read receipt) ─
+// ── PUT /api/messages/:id/read — Mark as read ────────────────
+// Marks the message read in the DB, sets self_destruct_at if
+// burn-after-read is enabled, then immediately pushes a
+// read_receipt event over WebSocket to the sender.
+//
+// WS payload delivered to sender:
+//   { type: 'read_receipt', message_id, read_by, opened_at,
+//     self_destruct_at }
 router.put('/:id/read', authenticate, async (req, res) => {
   try {
     const myId = req.user.id;
@@ -194,7 +343,7 @@ router.put('/:id/read', authenticate, async (req, res) => {
 
     const msg = msgResult.rows[0];
 
-    // Only the recipient (or a group member who isn't the sender) can mark as read
+    // Only the recipient (or a group member who isn't the sender) can mark read
     if (msg.recipient_id) {
       if (msg.recipient_id !== myId) {
         return res.status(403).json({ error: 'Not the recipient of this message' });
@@ -213,7 +362,7 @@ router.put('/:id/read', authenticate, async (req, res) => {
       }
     }
 
-    // Already opened — return current state
+    // Already opened — return current state without pushing a duplicate receipt
     if (msg.read) {
       const current = await pool.query(
         `SELECT id, read, opened_at, self_destruct_at FROM messages WHERE id = $1`,
@@ -222,7 +371,6 @@ router.put('/:id/read', authenticate, async (req, res) => {
       return res.json(current.rows[0]);
     }
 
-    // Set opened_at and self_destruct_at if burn_after_read is enabled
     let selfDestructAt = null;
     if (msg.burn_after_read && msg.burn_timer_seconds) {
       selfDestructAt = new Date(Date.now() + msg.burn_timer_seconds * 1000);
@@ -238,78 +386,35 @@ router.put('/:id/read', authenticate, async (req, res) => {
       [selfDestructAt, messageId]
     );
 
-    return res.json(updateResult.rows[0]);
+    const updated = updateResult.rows[0];
+
+    // ── Push read receipt to the sender over WebSocket ────────
+    // Fires regardless of whether the sender is currently connected;
+    // sendToUser is a silent no-op when they have no open sockets.
+    sendToUser(msg.sender_id, {
+      type: 'read_receipt',
+      message_id: messageId,
+      read_by: myId,
+      opened_at: updated.opened_at,
+      self_destruct_at: updated.self_destruct_at
+    });
+
+    return res.json(updated);
   } catch (err) {
     console.error('Mark read error:', err);
     return res.status(500).json({ error: 'Internal server error' });
   }
 });
 
-// ── POST /api/messages/typing — Typing indicator ────────────
-// Client polls or uses WebSockets. This endpoint stores the
-// typing state ephemerally — no persistence needed.
-const typingState = new Map();
-
-router.post('/typing', authenticate, (req, res) => {
-  const { recipient_id, group_id, is_typing } = req.body;
-
-  if (!recipient_id && !group_id) {
-    return res.status(400).json({ error: 'Provide recipient_id or group_id' });
-  }
-
-  const key = recipient_id
-    ? `dm:${[req.user.id, recipient_id].sort().join(':')}`
-    : `group:${group_id}`;
-
-  if (!typingState.has(key)) {
-    typingState.set(key, {});
-  }
-
-  const state = typingState.get(key);
-
-  if (is_typing) {
-    state[req.user.id] = Date.now();
-  } else {
-    delete state[req.user.id];
-  }
-
-  return res.json({ ok: true });
-});
-
-// ── GET /api/messages/typing/:targetId — Get typing status ──
-router.get('/typing/:targetId', authenticate, (req, res) => {
-  const targetId = req.params.targetId;
-  const type = req.query.type || 'dm'; // dm or group
-  const myId = req.user.id;
-
-  const key = type === 'group'
-    ? `group:${targetId}`
-    : `dm:${[myId, targetId].sort().join(':')}`;
-
-  const state = typingState.get(key) || {};
-  const now = Date.now();
-  const TYPING_TIMEOUT = 5000; // 5 second timeout
-
-  // Filter out stale typing indicators and exclude self
-  const typingUsers = Object.entries(state)
-    .filter(([userId, timestamp]) => userId !== myId && now - timestamp < TYPING_TIMEOUT)
-    .map(([userId]) => userId);
-
-  return res.json({ typing: typingUsers });
-});
-
 // ── DELETE /api/messages/expired — Cleanup expired messages ──
-// Called by a server-side cron or scheduled task.
 router.delete('/expired', authenticate, async (req, res) => {
   try {
-    // Delete messages past their unopened expiry (24 hours)
     const expiredResult = await pool.query(
       `DELETE FROM messages
        WHERE expires_at IS NOT NULL AND expires_at <= NOW() AND read = FALSE
        RETURNING id`
     );
 
-    // Delete messages past their burn self-destruct timer
     const burnedResult = await pool.query(
       `DELETE FROM messages
        WHERE self_destruct_at IS NOT NULL AND self_destruct_at <= NOW()
@@ -327,12 +432,10 @@ router.delete('/expired', authenticate, async (req, res) => {
 });
 
 // ── GET /api/messages/inbox — Inbox summary ─────────────────
-// Returns the latest message per conversation for the inbox view.
 router.get('/inbox', authenticate, async (req, res) => {
   try {
     const myId = req.user.id;
 
-    // Direct message conversations: latest message per partner
     const dmResult = await pool.query(
       `SELECT DISTINCT ON (partner_id)
               m.id, m.sender_id, m.recipient_id, m.encrypted_content,
@@ -348,7 +451,6 @@ router.get('/inbox', authenticate, async (req, res) => {
       [myId]
     );
 
-    // Group conversations: latest message per group the user is a member of
     const groupResult = await pool.query(
       `SELECT DISTINCT ON (m.group_id)
               m.id, m.sender_id, m.group_id, m.encrypted_content,
@@ -363,10 +465,7 @@ router.get('/inbox', authenticate, async (req, res) => {
       [myId]
     );
 
-    return res.json({
-      direct: dmResult.rows,
-      groups: groupResult.rows
-    });
+    return res.json({ direct: dmResult.rows, groups: groupResult.rows });
   } catch (err) {
     console.error('Inbox error:', err);
     return res.status(500).json({ error: 'Internal server error' });
@@ -393,7 +492,6 @@ router.get('/:id', authenticate, async (req, res) => {
 
     const msg = result.rows[0];
 
-    // Verify access: must be sender, recipient, or group member
     if (msg.recipient_id) {
       if (msg.sender_id !== myId && msg.recipient_id !== myId) {
         return res.status(403).json({ error: 'Access denied' });
@@ -409,7 +507,6 @@ router.get('/:id', authenticate, async (req, res) => {
       }
     }
 
-    // Check if expired
     if (msg.expires_at && new Date(msg.expires_at) <= new Date() && !msg.read) {
       return res.status(410).json({ error: 'Message has expired' });
     }
@@ -424,4 +521,13 @@ router.get('/:id', authenticate, async (req, res) => {
   }
 });
 
-module.exports = router;
+// ── Exports ──────────────────────────────────────────────────
+// index.js usage:
+//
+//   const http = require('http');
+//   const { router: messagesRouter, upgradeHandler } = require('./routes/messages');
+//   app.use('/api/messages', messagesRouter);
+//   const httpServer = http.createServer(app);
+//   httpServer.on('upgrade', upgradeHandler);
+//   httpServer.listen(PORT);
+module.exports = { router, wss, upgradeHandler };

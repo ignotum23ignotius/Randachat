@@ -1,3 +1,4 @@
+const http = require('http');
 const express = require('express');
 const path = require('path');
 require('dotenv').config();
@@ -8,8 +9,11 @@ const app = express();
 app.use(express.json());
 
 // ── API routes ────────────────────────────────────────────────
+// messages exports { router, wss, upgradeHandler } — destructure here.
+const { router: messagesRouter, upgradeHandler } = require('./routes/messages');
+
 app.use('/api/auth',     require('./routes/auth'));
-app.use('/api/messages', require('./routes/messages'));
+app.use('/api/messages', messagesRouter);
 app.use('/api/images',   require('./routes/images'));
 app.use('/api/friends',  require('./routes/friends'));
 app.use('/api/groups',   require('./routes/groups'));
@@ -28,8 +32,16 @@ if (process.env.NODE_ENV === 'production') {
   });
 }
 
+// ── HTTP server + WebSocket upgrade ──────────────────────────
+// The ws WebSocketServer is noServer — it does not bind its own
+// port. We create an http.Server from the Express app and route
+// WebSocket upgrade requests (ws://host/ws?token=...) through
+// the upgradeHandler exported by messages.js.
+const httpServer = http.createServer(app);
+httpServer.on('upgrade', upgradeHandler);
+
 // ── Start ─────────────────────────────────────────────────────
 const PORT = process.env.PORT || 5000;
-app.listen(PORT, () => {
+httpServer.listen(PORT, () => {
   console.log(`Server running on port ${PORT} [${process.env.NODE_ENV || 'development'}]`);
 });
