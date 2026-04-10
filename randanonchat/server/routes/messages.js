@@ -230,7 +230,25 @@ router.post('/', authenticate, async (req, res) => {
       ]
     );
 
-    return res.status(201).json(result.rows[0]);
+    const saved = result.rows[0];
+
+    // Push new message to recipient over WebSocket immediately.
+    // For direct messages, push to recipient_id.
+    // For group messages, push to every active member except the sender.
+    if (saved.recipient_id) {
+      sendToUser(saved.recipient_id, { type: 'new_message', message: saved });
+    } else if (saved.group_id) {
+      const members = await pool.query(
+        `SELECT user_id FROM group_members
+         WHERE group_id = $1 AND removed_at IS NULL AND user_id != $2`,
+        [saved.group_id, senderId]
+      );
+      for (const row of members.rows) {
+        sendToUser(row.user_id, { type: 'new_message', message: saved });
+      }
+    }
+
+    return res.status(201).json(saved);
   } catch (err) {
     console.error('Send message error:', err);
     return res.status(500).json({ error: 'Internal server error' });
