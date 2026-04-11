@@ -19,6 +19,7 @@ app.use('/api/friends',  require('./routes/friends'));
 app.use('/api/groups',   require('./routes/groups'));
 app.use('/api/matching', require('./routes/matching'));
 app.use('/api/payments', require('./routes/payments'));
+app.use('/api/users',    require('./routes/users'));
 
 // ── Serve React client build in production ────────────────────
 // Vite outputs to client/dist. Express serves the static assets

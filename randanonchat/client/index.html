@@ -1,0 +1,31 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+
+    <!-- PWA viewport: full screen, no browser bar -->
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover" />
+
+    <!-- PWA theme colour — matches manifest.json background_color -->
+    <meta name="theme-color" content="#000000" />
+
+    <!-- iOS PWA: hide Safari chrome when launched from home screen -->
+    <meta name="apple-mobile-web-app-capable" content="yes" />
+    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
+    <meta name="apple-mobile-web-app-title" content="RandAnon" />
+
+    <!-- Standard app meta -->
+    <meta name="description" content="Anonymous encrypted random chat" />
+    <meta name="mobile-web-app-capable" content="yes" />
+
+    <!-- Favicon / touch icon (files placed in client/public/icons/) -->
+    <link rel="icon" type="image/png" sizes="192x192" href="/icons/icon-192.png" />
+    <link rel="apple-touch-icon" href="/icons/icon-192.png" />
+
+    <title>RandAnonChat</title>
+  </head>
+  <body>
+    <div id="root"></div>
+    <script type="module" src="/src/main.jsx"></script>
+  </body>
+</html>

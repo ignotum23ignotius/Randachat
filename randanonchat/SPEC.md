@@ -41,7 +41,8 @@ randanonchat/
     │   ├── friends.js
     │   ├── groups.js
     │   ├── matching.js
-    │   └── payments.js
+    │   ├── payments.js
+    │   └── users.js
     └── db/
         ├── index.js
         └── schema.sql
@@ -478,6 +479,35 @@ If pool empty → serve least-recently-seen random
 ### One-Way Add
 - They dismiss → stays in Randoms tab
 - No pending state cluttering Friends tab
+
+---
+
+## User Search System
+
+### UI
+- Two input boxes side by side in the inbox screen
+- Left box placeholder: `Name`
+- Right box placeholder: `#####`
+- No other instructions or hints beyond the placeholders
+
+### Search Logic
+- **Right box only (numbers):** Search by ID number portion of username — returns all users with that exact number (max 1-5 results)
+- **Left box only (text):** Search by noun+verb portion of username — exact match only
+- **Both boxes filled:** Search full username NounVerb12345 — exact match only
+- Results show username only — no profile info, no pictures
+- Tap result → opens chat
+
+### Privacy
+- Cannot browse users
+- Must know at least half the username exactly
+- Maximum 2-3 results ever returned
+- No profile info exposed to strangers
+- The number-based search is intentionally undocumented — observant users discover it themselves
+
+### Backend
+- GET /api/users/search?q= endpoint in server/routes/users.js
+- Mounted at /api/users in server/index.js
+- Uses shared pool from ../db
 
 ---
 
