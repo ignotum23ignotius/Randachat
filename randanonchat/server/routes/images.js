@@ -175,7 +175,8 @@ router.get('/:id', authenticate, async (req, res) => {
 });
 
 // ── DELETE /api/images/:id — Delete a blob ───────────────────
-// Uploader can delete their own blobs.
+// For DMs: uploader or recipient can delete.
+// For group images: any active group member can delete.
 // Called client-side after self-destruct or expiry confirmation.
 // messages.js handles scheduling; this endpoint does the actual wipe.
 router.delete('/:id', authenticate, async (req, res) => {
@@ -184,7 +185,7 @@ router.delete('/:id', authenticate, async (req, res) => {
     const { id } = req.params;
 
     const result = await pool.query(
-      `SELECT id, uploader_id FROM image_blobs WHERE id = $1`,
+      `SELECT id, uploader_id, recipient_id, group_id FROM image_blobs WHERE id = $1`,
       [id]
     );
 
@@ -192,8 +193,24 @@ router.delete('/:id', authenticate, async (req, res) => {
       return res.status(404).json({ error: 'Image not found' });
     }
 
-    if (result.rows[0].uploader_id !== myId) {
-      return res.status(403).json({ error: 'Only the uploader can delete this image' });
+    const image = result.rows[0];
+
+    // Access control: uploader or recipient for DMs; any active member for groups
+    if (image.recipient_id) {
+      if (image.uploader_id !== myId && image.recipient_id !== myId) {
+        return res.status(403).json({ error: 'Access denied' });
+      }
+    } else if (image.group_id) {
+      const memberCheck = await pool.query(
+        `SELECT id FROM group_members
+         WHERE group_id = $1 AND user_id = $2 AND removed_at IS NULL`,
+        [image.group_id, myId]
+      );
+      if (memberCheck.rows.length === 0) {
+        return res.status(403).json({ error: 'Access denied' });
+      }
+    } else {
+      return res.status(403).json({ error: 'Access denied' });
     }
 
     await pool.query(`DELETE FROM image_blobs WHERE id = $1`, [id]);

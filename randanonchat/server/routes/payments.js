@@ -198,11 +198,11 @@ async function acknowledgePurchase(productId, purchaseToken) {
 // Random bundles (one-time) — cost is diamonds, but purchased via
 // Play as IAPs that credit randoms + optional filter:
 //   randoms_50            100💎  $1.00
-//   randoms_100           200💎  $2.00
-//   randoms_250           300💎  $3.00
+//   randoms_100           190💎  $2.00
+//   randoms_250           450💎  $3.00
 //   randoms_50_filters    200💎  $2.00
-//   randoms_100_filters   400💎  $4.00
-//   randoms_250_filters   600💎  $6.00
+//   randoms_100_filters   380💎  $4.00
+//   randoms_250_filters   900💎  $6.00
 //
 // Subscription (recurring):
 //   sub_monthly           1000💎 $10.00/month
@@ -223,11 +223,11 @@ const DIAMOND_PRODUCTS = {
 
 const RANDOM_PRODUCTS = {
   randoms_50:           { randoms: 50,  diamonds: 100, usd: 1.00,  filters: false },
-  randoms_100:          { randoms: 100, diamonds: 200, usd: 2.00,  filters: false },
-  randoms_250:          { randoms: 250, diamonds: 300, usd: 3.00,  filters: false },
+  randoms_100:          { randoms: 100, diamonds: 190, usd: 2.00,  filters: false },
+  randoms_250:          { randoms: 250, diamonds: 450, usd: 3.00,  filters: false },
   randoms_50_filters:   { randoms: 50,  diamonds: 200, usd: 2.00,  filters: true  },
-  randoms_100_filters:  { randoms: 100, diamonds: 400, usd: 4.00,  filters: true  },
-  randoms_250_filters:  { randoms: 250, diamonds: 600, usd: 6.00,  filters: true  }
+  randoms_100_filters:  { randoms: 100, diamonds: 380, usd: 4.00,  filters: true  },
+  randoms_250_filters:  { randoms: 250, diamonds: 900, usd: 6.00,  filters: true  }
 };
 
 const SUBSCRIPTION_PRODUCTS = {
