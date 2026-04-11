@@ -44,6 +44,7 @@ CREATE TABLE users (
     location_filter     JSONB DEFAULT '["usa","canada","eu","other"]',
     randoms_enabled     BOOLEAN DEFAULT TRUE,
     push_token          TEXT,
+    bio                 TEXT,
     created_at          TIMESTAMP DEFAULT NOW(),
     updated_at          TIMESTAMP DEFAULT NOW()
 );

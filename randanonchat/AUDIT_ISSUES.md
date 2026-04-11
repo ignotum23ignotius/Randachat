@@ -22,7 +22,7 @@
 ---
 
 ## Re-test Later:
-- server/db/schema.sql — re-verify completely after dev agenda items 7 and 9 are complete
+- server/db/schema.sql — re-verify completely after dev agenda items 7, 8, and 9 are complete ✅ All three complete — schema.sql ready for re-verification
 
 ---
 
