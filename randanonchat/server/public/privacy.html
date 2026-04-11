@@ -1,0 +1,312 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Privacy Policy — RandAnonChat</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=IM+Fell+English:ital@0;1&family=Uncial+Antiqua&display=swap" rel="stylesheet" />
+  <style>
+    *, *::before, *::after {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+    }
+
+    html {
+      scroll-behavior: smooth;
+    }
+
+    body {
+      background: linear-gradient(180deg, #1c0626 0%, #38074f 100%);
+      background-attachment: fixed;
+      color: rgba(128, 122, 27, 0.70);
+      font-family: 'Uncial Antiqua', serif;
+      min-height: 100vh;
+      -webkit-font-smoothing: antialiased;
+    }
+
+    .page {
+      max-width: 680px;
+      margin: 0 auto;
+      padding: 60px 24px 80px;
+    }
+
+    /* ── Back link ── */
+    .back {
+      display: inline-block;
+      font-family: 'IM Fell English', serif;
+      font-size: 0.9rem;
+      color: rgba(128, 122, 27, 0.55);
+      text-decoration: none;
+      letter-spacing: 0.05em;
+      margin-bottom: 48px;
+      transition: color 0.25s;
+    }
+
+    .back:hover {
+      color: #807a1b;
+    }
+
+    /* ── Page heading ── */
+    h1 {
+      font-family: 'Uncial Antiqua', serif;
+      font-size: clamp(1.6rem, 5vw, 2.2rem);
+      color: #807a1b;
+      letter-spacing: 0.03em;
+      line-height: 1.3;
+      margin-bottom: 12px;
+    }
+
+    .meta {
+      font-family: 'IM Fell English', serif;
+      font-size: 0.85rem;
+      color: rgba(128, 122, 27, 0.45);
+      margin-bottom: 52px;
+    }
+
+    /* ── Sections ── */
+    .section {
+      margin-bottom: 44px;
+    }
+
+    h2 {
+      font-family: 'Uncial Antiqua', serif;
+      font-size: clamp(1rem, 3vw, 1.2rem);
+      color: #807a1b;
+      letter-spacing: 0.02em;
+      margin-bottom: 14px;
+    }
+
+    p {
+      font-family: 'Uncial Antiqua', serif;
+      font-size: clamp(0.85rem, 2.5vw, 0.95rem);
+      color: rgba(128, 122, 27, 0.70);
+      line-height: 1.85;
+      margin-bottom: 12px;
+    }
+
+    p:last-child {
+      margin-bottom: 0;
+    }
+
+    ul {
+      list-style: none;
+      padding: 0;
+      margin-bottom: 12px;
+    }
+
+    ul li {
+      font-family: 'Uncial Antiqua', serif;
+      font-size: clamp(0.85rem, 2.5vw, 0.95rem);
+      color: rgba(128, 122, 27, 0.70);
+      line-height: 1.85;
+      padding-left: 1.4em;
+      position: relative;
+    }
+
+    ul li::before {
+      content: '⚸';
+      position: absolute;
+      left: 0;
+      color: rgba(128, 122, 27, 0.40);
+      font-size: 0.75em;
+      top: 0.2em;
+    }
+
+    a {
+      color: #807a1b;
+      text-decoration: none;
+      transition: color 0.25s;
+    }
+
+    a:hover {
+      color: #a09e2e;
+    }
+
+    /* ── Divider ── */
+    .divider {
+      border: none;
+      border-top: 1px solid rgba(128, 122, 27, 0.15);
+      margin: 48px 0;
+    }
+
+    /* ── Footer ── */
+    footer {
+      border-top: 1px solid rgba(128, 122, 27, 0.15);
+      padding: 36px 0 0;
+      margin-top: 60px;
+    }
+
+    footer nav {
+      font-family: 'IM Fell English', serif;
+      font-size: 0.85rem;
+      color: rgba(128, 122, 27, 0.55);
+      display: flex;
+      flex-wrap: wrap;
+      gap: 6px 16px;
+    }
+
+    footer nav a {
+      color: rgba(128, 122, 27, 0.55);
+      text-decoration: none;
+      transition: color 0.25s;
+    }
+
+    footer nav a:hover {
+      color: #807a1b;
+    }
+
+    footer nav span {
+      color: rgba(128, 122, 27, 0.25);
+      user-select: none;
+    }
+  </style>
+</head>
+<body>
+  <div class="page">
+
+    <a href="/" class="back">&larr; Return</a>
+
+    <h1>Privacy Policy</h1>
+    <p class="meta">Effective date: April 10, 2026 &nbsp;&middot;&nbsp; Contact: <a href="mailto:legal@randanonchat.com">legal@randanonchat.com</a></p>
+
+    <div class="section">
+      <h2>1. Overview</h2>
+      <p>RandAnonChat ("we", "us", "our") is built around a single principle: we should know as little about you as possible. This policy explains what data we collect, why we collect it, and what we do not collect by design.</p>
+      <p>This Service is intended for adults aged 18 and over. By using the Service you confirm you meet that requirement.</p>
+    </div>
+
+    <div class="section">
+      <h2>2. Data We Collect</h2>
+      <p>We collect only what is technically necessary to operate the Service:</p>
+      <ul>
+        <li><strong>Account data:</strong> your auto-generated username, Argon2id password hash, X25519 public key, age range, gender, location category, and account tier. Your password is never stored in plain text. Your private key is never transmitted to or stored by us.</li>
+        <li><strong>Device fingerprints:</strong> stored as a JSON array on your account record for the sole purpose of enforcing shadow bans on accounts that have violated our Terms of Service. Not used for advertising or tracking.</li>
+        <li><strong>Session data:</strong> session start and end timestamps, used to compute anonymous aggregate statistics (daily active users, average session duration). Not linked to identifiable individuals in any reports.</li>
+        <li><strong>Encrypted message and image blobs:</strong> stored on our servers in encrypted form only. We cannot read them. They are deleted on expiry per the burn-on-read and 24-hour rules defined in the application.</li>
+        <li><strong>Encrypted image blob URLs:</strong> references to encrypted files stored in GCP Cloud Storage. The underlying files are encrypted before upload and cannot be read by us or by the storage provider.</li>
+        <li><strong>Purchase records:</strong> Google Play order ID, product ID, purchase token, diamond amount, USD amount, and status. Required to credit your account and handle refunds. Payment card data is handled entirely by Google and never seen by us.</li>
+        <li><strong>CSAM report metadata:</strong> in the event of a client-side CSAM hash match, we log the image hash, IP address, account ID, timestamp, and device fingerprint. This data is reported to the NCMEC CyberTipline. No image is ever stored.</li>
+      </ul>
+    </div>
+
+    <div class="section">
+      <h2>3. Data We Do Not Collect</h2>
+      <ul>
+        <li>Your real name, email address, or phone number — none are required or requested.</li>
+        <li>Your precise location — only a broad regional category (USA, Canada, EU, Other) selected by you at signup.</li>
+        <li>The content of your messages or images — all communications are end-to-end encrypted and unreadable to us.</li>
+        <li>Advertising identifiers or behavioural tracking data of any kind.</li>
+        <li>Your contacts, camera roll, or any other device data beyond what you explicitly submit.</li>
+      </ul>
+    </div>
+
+    <div class="section">
+      <h2>4. End-to-End Encryption</h2>
+      <p>All messages and images are encrypted on your device using libsodium (X25519-XSalsa20-Poly1305) before transmission. Your private key is generated locally and stored only in your device's localStorage. It is never transmitted to our servers. We store only encrypted ciphertext and have no technical means to decrypt it.</p>
+      <p>Images use hybrid encryption: the image blob is encrypted with a random symmetric key via <code>crypto_secretbox</code>, and that key is sealed to the recipient's public key via <code>crypto_box_seal</code>. For group messages, the symmetric key is sealed individually to each member's public key.</p>
+    </div>
+
+    <div class="section">
+      <h2>5. How We Use Your Data</h2>
+      <ul>
+        <li>To create and authenticate your account.</li>
+        <li>To route encrypted messages and images to the intended recipient.</li>
+        <li>To enforce burn-on-read timers and message expiry.</li>
+        <li>To match you with random strangers according to your filter preferences.</li>
+        <li>To process payments and credit your diamond balance.</li>
+        <li>To enforce bans on accounts that have violated the Terms of Service.</li>
+        <li>To detect and report CSAM as required by law.</li>
+        <li>To compute anonymous aggregate statistics for internal operational purposes.</li>
+      </ul>
+      <p>We do not sell, rent, or share your data with third parties for advertising or commercial purposes.</p>
+    </div>
+
+    <div class="section">
+      <h2>6. Third-Party Services</h2>
+      <p>The following third-party services are involved in operating the Service:</p>
+      <ul>
+        <li><strong>Google Play Billing:</strong> handles all payment processing. Subject to Google's own privacy policy. We receive purchase confirmation data only.</li>
+        <li><strong>GCP Cloud Storage (Google):</strong> stores encrypted image blobs. Google cannot read the content as files are encrypted before upload.</li>
+        <li><strong>GCP Compute Engine (Google):</strong> hosts the server infrastructure.</li>
+        <li><strong>GCP Cloud SQL (Google):</strong> hosts the PostgreSQL database.</li>
+        <li><strong>NCMEC CyberTipline:</strong> receives mandatory reports in the event of CSAM detection. Reports contain hash and metadata only — no image content.</li>
+        <li><strong>Google Fonts:</strong> fonts are loaded from Google's CDN. Standard Google Fonts privacy practices apply.</li>
+      </ul>
+    </div>
+
+    <div class="section">
+      <h2>7. Data Retention</h2>
+      <ul>
+        <li><strong>Messages:</strong> deleted server-side when a burn timer expires or 24 hours after sending if unopened, whichever comes first.</li>
+        <li><strong>Images:</strong> deleted server-side 30 seconds after the recipient first opens them, or 24 hours after sending if unopened.</li>
+        <li><strong>Account data:</strong> retained for the lifetime of your account. Deleted upon account deletion, except where retention is required by law.</li>
+        <li><strong>CSAM report metadata:</strong> retained indefinitely as required by law and NCMEC reporting obligations.</li>
+        <li><strong>Purchase records:</strong> retained for a minimum of seven years for financial and tax compliance.</li>
+        <li><strong>Session statistics:</strong> retained in anonymised aggregate form indefinitely for operational analytics.</li>
+      </ul>
+    </div>
+
+    <div class="section">
+      <h2>8. Account Deletion</h2>
+      <p>You may delete your account at any time from the Settings screen. Upon deletion, your account record, profile data, encrypted message blobs, and encrypted image blobs are deleted. Owned groups are closed. Purchase records and any CSAM report metadata associated with your account are retained as required by law.</p>
+      <p>Because messages are encrypted and we cannot read them, we are unable to selectively retrieve or export your message content on request.</p>
+    </div>
+
+    <div class="section">
+      <h2>9. Security</h2>
+      <p>We employ the following measures to protect your data:</p>
+      <ul>
+        <li>End-to-end encryption for all message and image content.</li>
+        <li>Argon2id password hashing (64 MB memory, 3 iterations) — industry best practice.</li>
+        <li>JWT authentication with 7-day expiry and server-side secret rotation capability.</li>
+        <li>TLS (Let's Encrypt) for all data in transit.</li>
+        <li>Encrypted image storage — blobs are encrypted before leaving your device.</li>
+        <li>No logging of plaintext content at any point in the pipeline.</li>
+      </ul>
+      <p>No system is perfectly secure. In the event of a data breach affecting your personal data, we will notify affected users as required by applicable law.</p>
+    </div>
+
+    <div class="section">
+      <h2>10. Children's Privacy</h2>
+      <p>The Service is strictly for adults aged 18 and over. We do not knowingly collect any data from anyone under 18. If we become aware that a user is under 18, we will terminate their account and delete their data immediately. If you believe a minor has accessed the Service, contact us at <a href="mailto:legal@randanonchat.com">legal@randanonchat.com</a>.</p>
+    </div>
+
+    <div class="section">
+      <h2>11. Your Rights</h2>
+      <p>Depending on your jurisdiction, you may have rights regarding your personal data, including the right to access, correct, or delete it. To exercise any such rights, contact us at <a href="mailto:legal@randanonchat.com">legal@randanonchat.com</a>.</p>
+      <p>Because message content is end-to-end encrypted and we hold no decryption keys, we are technically unable to provide or delete message content specifically. Account deletion (Section 8) is the most complete remedy available.</p>
+    </div>
+
+    <div class="section">
+      <h2>12. Open Source</h2>
+      <p>The client-side source code is publicly available under the AGPL-3.0 license. You can independently verify how data is handled on the client, including the encryption implementation and the CSAM detection pipeline. Server-side payment logic is not included in the open source release.</p>
+    </div>
+
+    <div class="section">
+      <h2>13. Changes to This Policy</h2>
+      <p>We may update this Privacy Policy from time to time. The effective date at the top of this page will be updated when changes are made. Your continued use of the Service after any update constitutes acceptance of the revised policy.</p>
+    </div>
+
+    <div class="section">
+      <h2>14. Contact</h2>
+      <p>Questions or concerns regarding this Privacy Policy may be directed to: <a href="mailto:legal@randanonchat.com">legal@randanonchat.com</a></p>
+    </div>
+
+    <footer>
+      <nav>
+        <a href="/">Home</a>
+        <span>&middot;</span>
+        <span>Privacy Policy</span>
+        <span>&middot;</span>
+        <a href="/tos">Terms of Service</a>
+        <span>&middot;</span>
+        <span>&copy; 2025 Randachat</span>
+      </nav>
+    </footer>
+
+  </div>
+</body>
+</html>
