@@ -1136,7 +1136,31 @@ All piecemeal purchases fire red splatter after Google Play confirmation.
 - Silent only — no content, no sender, no preview
 - Displays 🜃 symbol only or blank
 - User opens app, WebSocket connects, messages deliver instantly
-- Must be implemented server-side — on dev agenda
+- Must be implemented server-side
+
+#### Firebase Cloud Messaging (FCM) Setup
+- Firebase project linked to GCP project development-492316
+- Authentication via GCP Application Default Credentials — no key file needed
+- VM service account: 396887772062-compute@developer.gserviceaccount.com
+- Role granted: Firebase Cloud Messaging API Admin
+- FCM HTTP v1 API endpoint: https://fcm.googleapis.com/v1/projects/development-492316/messages:send
+
+#### Push Token
+- push_token TEXT column on users table
+- Index: idx_users_push_token WHERE push_token IS NOT NULL
+- Token registered/updated via POST /api/push/register on every app open
+- Token cleared on logout
+
+#### When To Send Push:
+- When a message is sent to a user who has no active WebSocket connection
+- Silent notification only — data payload with 🜃 symbol
+- No message content, no sender name, no count
+- Android handles delivery, app opens and WebSocket connects
+
+#### Server Implementation:
+- server/routes/push.js — register token endpoint
+- server/utils/fcm.js — FCM send utility using GCP metadata server for auth
+- messages.js sendToUser — if user has no open socket AND has push_token, send FCM push
 
 ---
 
