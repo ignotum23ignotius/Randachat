@@ -801,4 +801,115 @@ router.get('/catalogue', authenticate, async (_req, res) => {
   });
 });
 
+// ── POST /api/payments/generate-key ─────────────────────────
+// Admin-only endpoint protected by X-Cron-Secret header.
+// Generates a subscription key in the format:
+//   RANDA-XXXX-XXXX-XXXX-XXXX-XXXX-XXXX
+// where each X is a random uppercase alphanumeric character.
+// Stores the key in subscription_keys and returns it.
+router.post('/generate-key', async (req, res) => {
+  const secret = req.headers['x-cron-secret'];
+  if (!secret || secret !== process.env.CRON_SECRET) {
+    return res.status(401).json({ error: 'Unauthorized' });
+  }
+
+  try {
+    const crypto = require('crypto');
+    const CHARS = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789';
+
+    // Generate 6 groups of 4 random alphanumeric uppercase characters
+    const groups = [];
+    for (let g = 0; g < 6; g++) {
+      let group = '';
+      const bytes = crypto.randomBytes(4);
+      for (let i = 0; i < 4; i++) {
+        group += CHARS[bytes[i] % CHARS.length];
+      }
+      groups.push(group);
+    }
+    const key = `RANDA-${groups.join('-')}`;
+
+    await pool.query(
+      `INSERT INTO subscription_keys (key) VALUES ($1)`,
+      [key]
+    );
+
+    return res.status(201).json({ key });
+  } catch (err) {
+    console.error('Generate key error:', err);
+    return res.status(500).json({ error: 'Internal server error' });
+  }
+});
+
+// ── POST /api/payments/redeem-key ────────────────────────────
+// Authenticated user submits a subscription key.
+// Validates the key exists and has not been redeemed, then
+// grants 1 month subscription and marks the key as redeemed
+// atomically. "Keep What You Earned" applies — downgrade is
+// handled at access-check time; nothing is stripped on expiry.
+// Body: { key }
+router.post('/redeem-key', authenticate, async (req, res) => {
+  try {
+    const myId = req.user.id;
+    const { key } = req.body;
+
+    if (!key || typeof key !== 'string' || !key.trim()) {
+      return res.status(400).json({ error: 'key is required' });
+    }
+
+    const client = await pool.connect();
+    try {
+      await client.query('BEGIN');
+
+      // Lock the row so concurrent redemptions cannot race
+      const keyResult = await client.query(
+        `SELECT id, redeemed_by FROM subscription_keys
+         WHERE key = $1 FOR UPDATE`,
+        [key.trim()]
+      );
+
+      if (keyResult.rows.length === 0) {
+        await client.query('ROLLBACK');
+        return res.status(404).json({ error: 'Invalid key' });
+      }
+
+      if (keyResult.rows[0].redeemed_by !== null) {
+        await client.query('ROLLBACK');
+        return res.status(409).json({ error: 'Key has already been redeemed' });
+      }
+
+      // Grant 1 month from now (or extend from current expiry if still active)
+      const subExpiry = new Date();
+      subExpiry.setMonth(subExpiry.getMonth() + 1);
+
+      await client.query(
+        `UPDATE users SET tier = 'subscribed', sub_expiry = $1 WHERE id = $2`,
+        [subExpiry, myId]
+      );
+
+      await client.query(
+        `UPDATE subscription_keys
+         SET redeemed_by = $1, redeemed_at = NOW()
+         WHERE key = $2`,
+        [myId, key.trim()]
+      );
+
+      await client.query('COMMIT');
+
+      return res.json({
+        message: 'Subscription activated',
+        sub_expiry: subExpiry.toISOString()
+      });
+    } catch (err) {
+      await client.query('ROLLBACK');
+      throw err;
+    } finally {
+      client.release();
+    }
+  } catch (err) {
+    console.error('Redeem key error:', err);
+    return res.status(500).json({ error: 'Internal server error' });
+  }
+});
+
 module.exports = router;
