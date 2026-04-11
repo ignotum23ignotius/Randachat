@@ -238,12 +238,13 @@ router.get('/next', authenticate, async (req, res) => {
       // Pool empty → fallback: serve least-recently-seen random
       // (anyone we've chatted with before, preserving chat history)
       const fallbackResult = await pool.query(
-        `SELECT DISTINCT
-                CASE WHEN m.sender_id = $1 THEN m.recipient_id ELSE m.sender_id END AS partner_id
+        `SELECT CASE WHEN m.sender_id = $1 THEN m.recipient_id ELSE m.sender_id END AS partner_id,
+                MAX(m.created_at) AS last_message_at
          FROM messages m
          WHERE m.recipient_id IS NOT NULL
            AND (m.sender_id = $1 OR m.recipient_id = $1)
-         ORDER BY partner_id`,
+         GROUP BY partner_id
+         ORDER BY last_message_at ASC`,
         [myId]
       );
 

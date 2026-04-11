@@ -423,7 +423,11 @@ router.put('/:id/read', authenticate, async (req, res) => {
 });
 
 // ── DELETE /api/messages/expired — Cleanup expired messages ──
-router.delete('/expired', authenticate, async (req, res) => {
+router.delete('/expired', async (req, res) => {
+  const secret = req.headers['x-cron-secret'];
+  if (!secret || secret !== process.env.CRON_SECRET) {
+    return res.status(401).json({ error: 'Unauthorized' });
+  }
   try {
     // Fetch unopened expired rows before deleting so we can notify senders.
     const expiredRows = await pool.query(

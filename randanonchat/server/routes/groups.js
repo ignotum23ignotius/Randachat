@@ -625,6 +625,18 @@ router.delete('/:groupId', authenticate, async (req, res) => {
     const client = await pool.connect();
     try {
       await client.query('BEGIN');
+
+      // Fetch all active members before deleting so we can notify them
+      const membersResult = await client.query(
+        `SELECT user_id FROM group_members WHERE group_id = $1 AND removed_at IS NULL`,
+        [groupId]
+      );
+
+      // Notify every active member that they have been removed
+      for (const m of membersResult.rows) {
+        sendToUser(m.user_id, { type: 'group_member_removed', group_id: groupId });
+      }
+
       await client.query(`DELETE FROM messages WHERE group_id = $1`, [groupId]);
       await client.query(`DELETE FROM group_pictures WHERE group_id = $1`, [groupId]);
       await client.query(`DELETE FROM group_members WHERE group_id = $1`, [groupId]);

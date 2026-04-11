@@ -13,9 +13,9 @@
 |---|------|-------|--------|
 | 1 | client/vite.config.js | navigateFallback '/index.html' should be '/app/index.html' | ✅ Fixed |
 | 2 | server/routes/auth.js | Shadow ban JWT includes shadow_banned: true — detectable by user | ✅ Fixed |
-| 3 | server/routes/messages.js | DELETE /expired protected by authenticate middleware — should be server-side cron, not user-triggered | ⚠️ Open |
-| 4 | server/routes/matching.js | Fallback query orders by partner_id (UUID) not by last message timestamp — least recently seen logic broken | ⚠️ Open |
-| 5 | server/routes/groups.js | Delete group doesn't notify members via WS before deleting — clients won't know to clean up | ⚠️ Open |
+| 3 | server/routes/messages.js | DELETE /expired protected by authenticate middleware — should be server-side cron, not user-triggered | ✅ Fixed |
+| 4 | server/routes/matching.js | Fallback query orders by partner_id (UUID) not by last message timestamp — least recently seen logic broken | ✅ Fixed |
+| 5 | server/routes/groups.js | Delete group doesn't notify members via WS before deleting — clients won't know to clean up | ✅ Fixed |
 
 ---
 
