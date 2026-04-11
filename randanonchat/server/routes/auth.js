@@ -3,10 +3,8 @@ const router = express.Router();
 const crypto = require('crypto');
 const argon2 = require('argon2');
 const jwt = require('jsonwebtoken');
-const { Pool } = require('pg');
 const authenticate = require('../middleware/auth');
-
-const pool = new Pool({ connectionString: process.env.DATABASE_URL });
+const pool = require('../db');
 const JWT_SECRET = process.env.JWT_SECRET;
 const JWT_EXPIRY = '7d';
 

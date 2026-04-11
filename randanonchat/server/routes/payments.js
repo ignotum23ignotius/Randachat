@@ -1,10 +1,8 @@
 const express = require('express');
 const router = express.Router();
-const { Pool } = require('pg');
 const https = require('https');
 const authenticate = require('../middleware/auth');
-
-const pool = new Pool({ connectionString: process.env.DATABASE_URL });
+const pool = require('../db');
 
 // ── Google Play Billing verification ────────────────────────
 // All billing logic lives SERVER-SIDE only (spec requirement).

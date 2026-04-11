@@ -1,11 +1,9 @@
 const express = require('express');
 const router = express.Router();
-const { Pool } = require('pg');
 const { WebSocketServer } = require('ws');
 const jwt = require('jsonwebtoken');
 const authenticate = require('../middleware/auth');
-
-const pool = new Pool({ connectionString: process.env.DATABASE_URL });
+const pool = require('../db');
 
 const VALID_BURN_TIMERS = [10, 30, 60, 600, 3600];
 const UNOPENED_EXPIRY_HOURS = 24;

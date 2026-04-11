@@ -1,10 +1,8 @@
 const express = require('express');
 const router = express.Router();
-const { Pool } = require('pg');
 const authenticate = require('../middleware/auth');
 const { sendToUser } = require('./messages');
-
-const pool = new Pool({ connectionString: process.env.DATABASE_URL });
+const pool = require('../db');
 
 // ── Dynamic window calculation ──────────────────────────────
 // Fully self-calibrating — zero hardcoded numbers.

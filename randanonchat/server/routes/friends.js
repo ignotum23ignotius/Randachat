@@ -1,10 +1,8 @@
 const express = require('express');
 const router = express.Router();
-const { Pool } = require('pg');
 const authenticate = require('../middleware/auth');
 const { sendToUser } = require('./messages');
-
-const pool = new Pool({ connectionString: process.env.DATABASE_URL });
+const pool = require('../db');
 
 // ── POST /api/friends/request — Send a friend request ───────
 // Creates a pending row. Request NEVER expires — sits until acted on.
