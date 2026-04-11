@@ -2,6 +2,7 @@ const express = require('express');
 const router = express.Router();
 const { Pool } = require('pg');
 const authenticate = require('../middleware/auth');
+const { sendToUser } = require('./messages');
 
 const pool = new Pool({ connectionString: process.env.DATABASE_URL });
 
@@ -294,14 +295,17 @@ router.get('/next', authenticate, async (req, res) => {
       [myId]
     );
 
-    return res.json({
-      match: {
-        id: match.id,
-        age: match.age,
-        gender: match.gender,
-        location: match.location
-      }
-    });
+    const matchPayload = {
+      id: match.id,
+      age: match.age,
+      gender: match.gender,
+      location: match.location
+    };
+
+    // Notify the matched user instantly over WebSocket.
+    sendToUser(match.id, { type: 'new_match', match: { id: myId } });
+
+    return res.json({ match: matchPayload });
   } catch (err) {
     console.error('Matching error:', err);
     return res.status(500).json({ error: 'Internal server error' });
