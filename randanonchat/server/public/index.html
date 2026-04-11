@@ -42,18 +42,18 @@
     .ink-mask {
       display: block;
       clip-path: inset(0 100% 0 0);
-      transition: clip-path 1.4s cubic-bezier(0.16, 1, 0.3, 1);
+      transition: clip-path 4s cubic-bezier(0.16, 1, 0.3, 1);
     }
 
     .ink-mask.revealed {
-      clip-path: inset(0 0% 0 0);
+      clip-path: inset(0 -2px 0 0);
     }
 
     /* stagger children */
     .ink-group .ink-mask:nth-child(1) { transition-delay: 0s; }
-    .ink-group .ink-mask:nth-child(2) { transition-delay: 0.25s; }
-    .ink-group .ink-mask:nth-child(3) { transition-delay: 0.50s; }
-    .ink-group .ink-mask:nth-child(4) { transition-delay: 0.75s; }
+    .ink-group .ink-mask:nth-child(2) { transition-delay: 0.8s; }
+    .ink-group .ink-mask:nth-child(3) { transition-delay: 1.6s; }
+    .ink-group .ink-mask:nth-child(4) { transition-delay: 2.4s; }
 
     /* ── Layout ── */
     section {
@@ -104,19 +104,19 @@
       font-family: 'IM Fell English', serif;
       font-size: 1rem;
       letter-spacing: 0.08em;
-      color: #807a1b;
-      background: transparent;
+      color: #1c0626;
+      background: #807a1b;
       border: 1px solid #807a1b;
       padding: 12px 40px;
       text-decoration: none;
       cursor: pointer;
-      transition: box-shadow 0.3s ease, border-color 0.3s ease, color 0.3s ease;
+      transition: box-shadow 0.3s ease, background-color 0.3s ease, border-color 0.3s ease;
     }
 
     .btn-gold:hover {
       box-shadow: 0 0 18px rgba(128, 122, 27, 0.45), 0 0 6px rgba(128, 122, 27, 0.25);
+      background: #a09e2e;
       border-color: #a09e2e;
-      color: #a09e2e;
     }
 
     /* ── Section 2: Features ── */
