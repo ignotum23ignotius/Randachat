@@ -1175,8 +1175,12 @@ All piecemeal purchases fire red splatter after Google Play confirmation.
 7. Push notification infrastructure
 8. Subscription key system
 9. Bio column on users table
-10. Set up legal@randanonchat.com email
-11. Get Louisiana LLC
-12. Build all React app screens (design complete)
-13. TWA wrapper via PWABuilder
-14. Deploy to GCP via Dokku
+10. Build all React app screens (design complete)
+11. Deploy to GCP via Dokku
+12. Test everything
+13. Set up legal@randanonchat.com email
+14. Get Louisiana LLC
+15. TWA wrapper via PWABuilder
+16. Google Play developer account
+17. Enable real billing
+18. Public launch
