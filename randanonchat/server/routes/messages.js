@@ -4,6 +4,7 @@ const { WebSocketServer } = require('ws');
 const jwt = require('jsonwebtoken');
 const authenticate = require('../middleware/auth');
 const pool = require('../db');
+const { sendPushNotification } = require('../utils/fcm');
 
 const VALID_BURN_TIMERS = [10, 30, 60, 600, 3600];
 const UNOPENED_EXPIRY_HOURS = 24;
@@ -31,14 +32,30 @@ function unregister(userId, ws) {
 }
 
 // Send a JSON payload to every open socket for a given userId.
-// Silent no-op if the user has no connected sockets.
+// If the user has no connected sockets and has a push_token stored,
+// fire a silent FCM push notification (fire-and-forget, never throws).
 function sendToUser(userId, payload) {
   const sockets = clients.get(userId);
-  if (!sockets || sockets.size === 0) return;
-  const data = JSON.stringify(payload);
-  for (const ws of sockets) {
-    if (ws.readyState === ws.OPEN) ws.send(data);
+  if (sockets && sockets.size > 0) {
+    const data = JSON.stringify(payload);
+    for (const ws of sockets) {
+      if (ws.readyState === ws.OPEN) ws.send(data);
+    }
+    return;
   }
+
+  // No open socket — send a silent FCM push if the user has a token
+  pool.query(`SELECT push_token FROM users WHERE id = $1`, [userId])
+    .then(result => {
+      const pushToken = result.rows[0]?.push_token;
+      if (!pushToken) return;
+      sendPushNotification(pushToken).catch(err => {
+        console.error('FCM push error for user', userId, err);
+      });
+    })
+    .catch(err => {
+      console.error('FCM push_token lookup error for user', userId, err);
+    });
 }
 
 // ── Upgrade handler (exported for index.js) ──────────────────

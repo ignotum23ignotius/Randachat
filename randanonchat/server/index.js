@@ -20,6 +20,7 @@ app.use('/api/groups',   require('./routes/groups'));
 app.use('/api/matching', require('./routes/matching'));
 app.use('/api/payments', require('./routes/payments'));
 app.use('/api/users',    require('./routes/users'));
+app.use('/api/push',     require('./routes/push'));
 
 // ── Serve landing page + static assets ───────────────────────
 // server/public contains index.html (landing page) and hero.png.
