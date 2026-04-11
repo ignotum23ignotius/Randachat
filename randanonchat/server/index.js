@@ -27,13 +27,13 @@ app.use('/api/users',    require('./routes/users'));
 app.use(express.static(path.join(__dirname, 'public')));
 
 // ── Serve React client build in production ────────────────────
-// Vite outputs to client/dist. Express serves the static assets
-// and falls back to index.html for all non-API routes so React
-// Router handles client-side navigation.
+// Vite builds with base: '/app/' so all assets are under /app/.
+// The catch-all only handles /app/* so the landing page at /
+// is unaffected.
 if (process.env.NODE_ENV === 'production') {
   const clientDist = path.join(__dirname, '..', 'client', 'dist');
-  app.use(express.static(clientDist));
-  app.get('*', (req, res) => {
+  app.use('/app', express.static(clientDist));
+  app.get('/app/*', (req, res) => {
     res.sendFile(path.join(clientDist, 'index.html'));
   });
 }
