@@ -2,6 +2,7 @@ const express = require('express');
 const router = express.Router();
 const { Pool } = require('pg');
 const authenticate = require('../middleware/auth');
+const { sendToUser } = require('./messages');
 
 const pool = new Pool({ connectionString: process.env.DATABASE_URL });
 
@@ -261,6 +262,8 @@ router.post('/:groupId/members', authenticate, async (req, res) => {
       memberRow = result.rows[0];
     }
 
+    sendToUser(targetId, { type: 'group_member_added', group_id: groupId, user_id: targetId });
+
     return res.status(201).json({ member: memberRow });
   } catch (err) {
     console.error('Add member error:', err);
@@ -365,6 +368,7 @@ router.delete('/:groupId/members/:userId', authenticate, async (req, res) => {
       );
 
       await client.query('COMMIT');
+      sendToUser(userId, { type: 'group_member_removed', group_id: groupId });
       return res.json({ message: 'Member removed and group traces wiped' });
     } catch (err) {
       await client.query('ROLLBACK');
@@ -410,6 +414,19 @@ router.put('/:groupId/watermark', authenticate, async (req, res) => {
        RETURNING id, watermark_enabled`,
       [watermark_enabled, groupId]
     );
+
+    const members = await pool.query(
+      `SELECT user_id FROM group_members
+       WHERE group_id = $1 AND removed_at IS NULL`,
+      [groupId]
+    );
+    for (const m of members.rows) {
+      sendToUser(m.user_id, {
+        type: 'group_watermark_updated',
+        group_id: groupId,
+        watermark_enabled
+      });
+    }
 
     return res.json(result.rows[0]);
   } catch (err) {
