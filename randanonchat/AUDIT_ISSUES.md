@@ -16,7 +16,8 @@
 | 3 | server/routes/messages.js | DELETE /expired protected by authenticate middleware — should be server-side cron, not user-triggered | ✅ Fixed |
 | 4 | server/routes/matching.js | Fallback query orders by partner_id (UUID) not by last message timestamp — least recently seen logic broken | ✅ Fixed |
 | 6 | server/routes/images.js | DELETE endpoint only allows uploader to delete — recipient cannot trigger deletion on self-destruct | ✅ Fixed |
-| 9 | randanonchat/.gitignore | Missing critical entries — node_modules/, client/dist/, *.log, .DS_Store, coverage/ | ⚠️ Open |
+| 9 | randanonchat/.gitignore | Missing critical entries — node_modules/, client/dist/, *.log, .DS_Store, coverage/ | ✅ Fixed |
+| 10 | Randachat/.gitignore | Missing critical entries — outer gitignore only had randanonchat/.env | ✅ Fixed |
 
 ---
 
