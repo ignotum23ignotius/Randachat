@@ -793,6 +793,14 @@ Privacy Policy · Terms of Service · GitHub ↗ · © 2025 Randachat
 
 ---
 
+## Landing Page Bugs To Fix
+- Scroll reveal too fast — needs to be much slower
+- Text appearing instantly instead of revealing — animation not working
+- Enter button right border missing — CSS bug
+- Button style — gold background, purple text (currently reversed)
+
+---
+
 ## App UI (/app — React PWA)
 
 ### Global App Design Rules
@@ -800,18 +808,375 @@ Privacy Policy · Terms of Service · GitHub ↗ · © 2025 Randachat
 - Same fonts — Uncial Antiqua + IM Fell English
 - Dark backgrounds throughout — never white or light
 - Gold accents for interactive elements
-- Bubble messages: sender gold, recipient purple
+- Bubble messages: sender (you) gold, recipient orange (#802f1b)
 - All screens mobile-first
-- No ink reveal animation inside the app — that is landing page only
+- No ink reveal animation inside the app — landing page only
 - Subtle fade-in on screen load only
+- Currency symbol: 🜃 (alchemical gold) — internal name diamonds, display as 🜃
+- Placeholder avatar: purple eye image (client/public/eye.png)
+- Unread indicator: random occult emoji (🜏 ☽ ⚸ 🝒 ☿ ⚔ 🜄), gold, large font, far right of conversation item
 
-### Pending Design (to be designed screen by screen before building):
-- Signup screen
-- Login screen
-- Inbox screen
-- Chat screen
-- Image editor screen
-- Profile screen
-- Settings screen
-- Groups screen
-- Payments / diamonds screen
+---
+
+### Signup Screen — 4 Step Flow
+
+**Progress bar (every step):**
+- "X of 4" above bar — IM Fell English, orange accent #802f1b
+- Gold fill bar, orange outline #802f1b
+- Smooth fill animation between steps
+
+**Step 1 — Password Manager:**
+- Warning: you need a password manager to use this app
+- Links to KeePassXC and Bitwarden
+- Checkbox: "I have a password manager ready"
+- Next button
+
+**Step 2 — Account:**
+- Auto-generated username displayed prominently
+- One password field with complexity requirements shown
+
+**Step 3 — About You:**
+- Age slider 18-100
+- Gender selection (M / F / Trans / Other)
+- Location selection (USA / Canada / EU / Other)
+
+**Step 4 — Legal:**
+- Age gate checkbox: "I confirm I am 18 or older"
+- TOS agreement checkbox
+- Submit button
+
+---
+
+### Login Screen
+- Username field
+- Password field
+- Remember username checkbox (client side only)
+- No remember password option
+- Login button — gold background, purple text
+
+---
+
+### Inbox Screen
+
+**Header rows (top to bottom):**
+1. Randoms toggle
+2. Search — two boxes side by side: Name | #####
+3. Tabs — Friends | Randoms | Groups
+
+**Randoms Toggle:**
+- OFF: "Enter the Randa" — no emojis, dimmed, muted gold
+- ON: "Randa's Approaching" — occult emojis pulsing both sides, bright gold
+- Pulsing emojis: grow and shrink slowly, same as typing indicator
+
+**Conversation list item:**
+- Left: profile pic or purple eye placeholder (circular)
+- Center: username
+- Far right: timestamp, then unread occult emoji in large gold font if unread
+- No message preview
+
+**Groups tab conversation list:**
+- Group profile pic or purple eye placeholder
+- Most recent sender's username (group name is encrypted)
+- Same unread indicator
+
+**Bottom bar — Friends tab:**
+- Left: 🕯️ — start new random chat
+- Right: 🔮 — filter settings sheet
+
+**Bottom bar — Randoms tab:**
+- Left: 🕯️ — start new random chat
+- Right: 🔮 — filter settings sheet
+
+**Bottom bar — Groups tab:**
+- Left: 🕯️ — start new random chat
+- Right: ✦ — create new group
+
+---
+
+### Chat Screen
+
+**Header (left to right):**
+- Far left: profile pic / purple eye placeholder
+- Center: username
+- Right of username: ⚙️ settings cog
+- Far right: back arrow
+
+**Settings cog — bottom sheet:**
+- Add Friend
+- Ignore
+- Block
+
+**Message bubbles:**
+- Your messages: right side, gold
+- Their messages: left side, orange (#802f1b)
+
+**Input bar (left to right):**
+- 🕯️ burn timer button — opens bottom sheet (OFF/10s/30s/1m/10m/1hr)
+- Text input
+- Image attachment button
+- Send button
+
+**Burn indicator:**
+- 🕯️ + timer value beside every message when burn is active
+
+**Typing indicator:**
+- Three occult symbols slowly growing and shrinking — hypnotic, deliberate
+
+**Read receipt:**
+- 📜 scroll emoji under sent message when read
+
+**Friend request banner:**
+- Gold banner at top of chat
+- "[username] has added you as a friend"
+- Permanent — stays until YOU add them back via settings cog
+- No buttons on banner
+
+---
+
+### Burn Timer — Text vs Image
+
+**Text messages:**
+- 🕯️ in input bar → bottom sheet slides up
+- Options: OFF, 10s, 30s, 1m, 10m, 1hr
+- Gold selected state, purple background
+- Does not disrupt text input
+
+**Images:**
+- Burn step in image editor (step 5)
+- Simple checkbox ON/OFF
+- If ON — timer picker appears: 10s, 30s, 1m, 10m, 1hr
+
+---
+
+### Image Editor — 5 Steps
+
+**Every step:**
+- Top bar: Cancel (left) | Next (right) — gold text, purple bar
+- Bottom bar: controls — purple bar
+- Image fills space between bars
+
+**Step 1 — Crop:**
+- Bottom bar: aspect ratio names scroll left to right
+- Selected ratio: gold background, purple text
+- Unselected: purple background, gold text
+- Crop box outline: gold
+- Corner dots: purple, inviting drag
+- Center drag: moves crop box, never escapes bounds
+- No dimmed area outside crop
+
+**Step 2 — Filter:**
+- Bottom bar: filter names scroll left to right
+- Selected filter: gold background, purple text
+- No previews — name only
+
+**Step 3 — Text:**
+- Bottom bar: 3 font names
+- Tap font → cursor appears in image, keyboard opens
+- Type, then drag text anywhere on image
+- Vertical size slider on LEFT side of screen
+
+**Step 4 — Glow:**
+- Bottom: simple color wheel
+- No glow selected by default
+- Tap wheel to pick color — glow activates on text
+- Hit Next without tapping — no glow applied
+
+**Step 5 — Burn:**
+- 🕯️ checkbox ON/OFF
+- If ON — timer picker: 10s, 30s, 1m, 10m, 1hr
+- Next becomes Send
+
+**CSAM check:**
+- Runs before editor opens
+- User sees blank loading screen — looks like normal loading
+
+---
+
+### Profile Screen
+- Large primary photo top, full width
+- Tap → swipeable gallery of uploaded photos
+- Purple eye placeholder if no photos
+- Below photo: username, age, gender, location (one line)
+- Bio — max 100 words, visible to ALL users including randoms
+- No edit controls on this screen — everything in settings
+- Empty photo slots do not appear in gallery
+
+---
+
+### Settings Screen
+
+**Profile section:**
+- Bio field — Uncial Antiqua, 100 word live counter, warning: "Your bio is visible to all users including randoms"
+- Photo grid — uploaded photos show, empty slots hidden, tap to upload/replace, cooldown slots show countdown timer overlay in orange accent
+
+**Privacy section:**
+- Block/ignore list — scrollable, username + purple eye per entry, tap to unblock/unignore, confirmation before removing
+
+**Account section:**
+- Username display — gold, not editable
+- Logout button — gold background, purple text
+- Delete account — orange accent #802f1b, confirmation dialog, deletes everything possible, closes owned groups
+
+**Payments section:**
+- Current tier — Free or Subscribed
+- 🜃 balance — large gold number
+- Buy 🜃 button
+- Manage subscription button (if subscribed)
+- Subscription key redemption field — enter key, redeem for 1 month sub
+
+---
+
+### Filter Settings Sheet (🔮 crystal ball)
+- Slides up from bottom, half screen
+- No title — straight into controls
+- Age dual slider — always free, no chains
+- Gender checkboxes — ⛓️ chains if locked, orange "Unlock this match with filters — 4 🜃" button
+- Location checkboxes — always free, no chains
+- Apply button bottom — gold background, purple text
+
+---
+
+### Create New Group Flow (✦ button)
+- Simple name input screen
+- Type group name
+- Confirm — auto sends "hello world" first message
+- Group appears in Groups tab with most recent sender username shown
+
+---
+
+### Group Settings (⚙️ cog in group chat)
+
+**For creator:**
+- Group photo management
+- Add member by username
+- Remove member
+- Toggle watermark ON/OFF
+
+**For members:**
+- Leave group — orange accent, confirmation dialog
+
+---
+
+### Payments Screen — "The Ritual"
+
+**Header:**
+- 🜃 balance — large, gold, centered
+- Current tier below
+
+**"Offer to the Randa" — 🜃 bundles:**
+| USD | 🜃 | Bonus |
+|-----|-----|-------|
+| $1.00 | 100 🜃 | — |
+| $5.00 | 500 🜃 | — |
+| $10.00 | 1000 🜃 | — |
+| $20.00 | 2100 🜃 | +100 free |
+| $50.00 | 5400 🜃 | +400 free |
+| $100.00 | 11000 🜃 | +1000 free |
+| $200.00 | 24000 🜃 | +4000 free |
+
+**"Pledge to the Randa" — subscription:**
+- $10/month = 1000 🜃/month
+- Lists what subscription includes
+
+**"Feed the Randa" — random bundles:**
+| Bundle | 🜃 |
+|--------|-----|
+| +50 randoms | 100 🜃 |
+| +100 randoms | 190 🜃 |
+| +250 randoms | 450 🜃 |
+| +50 randoms + filters | 200 🜃 |
+| +100 randoms + filters | 380 🜃 |
+| +250 randoms + filters | 900 🜃 |
+
+**Payment flow:**
+1. User taps purchase
+2. Google Play Billing sheet slides up
+3. User completes payment
+4. Server confirms, credits 🜃
+5. Red splatter animation fires — full screen, bursts from tap point, fades over 1-2 seconds
+6. 🜃 balance updates
+
+---
+
+### Piecemeal Purchases — Contextual
+
+**Filter settings (gender/age locked):**
+- "Unlock this match with filters — 4 🜃"
+
+**Create group at limit:**
+- "Summon a new group — 200 🜃"
+
+**Photo slot at limit:**
+- "Claim this slot — 30 🜃"
+
+**Add group member at limit:**
+- "Invite this soul — 50 🜃"
+
+**Out of daily matches (🕯️ tapped):**
+- "Spend 2 🜃 for one more match"
+- "Spend 4 🜃 for one more match with filters"
+- Gold warning banner: "Others can still find you even when you're out of matches"
+
+All piecemeal purchases fire red splatter after Google Play confirmation.
+
+---
+
+### Single Item Pricing
+| Item | 🜃 |
+|------|-----|
+| 1 random without filter | 2 🜃 |
+| 1 random with filter | 4 🜃 |
+| Extra profile pic slot | 30 🜃 |
+| Extra group | 200 🜃 |
+| Extra group member | 50 🜃 |
+
+---
+
+### Push Notifications
+- Silent only — no content, no sender, no preview
+- Displays 🜃 symbol only or blank
+- User opens app, WebSocket connects, messages deliver instantly
+- Must be implemented server-side — on dev agenda
+
+---
+
+### Subscription Key System
+- Admin generates keys server-side
+- Single use, non-transferable
+- Redeemed in settings under payments section
+- Grants 1 month subscription on redemption
+- On dev agenda
+
+---
+
+## Legal
+
+### TOS
+- Filed at server/public/tos.html
+- Governing law: State of Louisiana, United States
+- Contact: legal@randanonchat.com
+- Completed 04/10/2026
+
+### Privacy Policy
+- Filed at server/public/privacy.html
+- Contact: legal@randanonchat.com
+- Completed 04/10/2026
+
+---
+
+## Dev Agenda (in order)
+
+1. Wire landing page in server/index.js — serve server/public at root
+2. Fix landing page bugs — scroll speed, button border, button colors
+3. Update vite.config.js for /app subpath
+4. Update server/index.js to serve React at /app
+5. Build server/public/tos.html
+6. Build server/public/privacy.html
+7. Push notification infrastructure
+8. Subscription key system
+9. Bio column on users table
+10. Set up legal@randanonchat.com email
+11. Get Louisiana LLC
+12. Build all React app screens (design complete)
+13. TWA wrapper via PWABuilder
+14. Deploy to GCP via Dokku
