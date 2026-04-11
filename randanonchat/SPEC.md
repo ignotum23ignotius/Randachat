@@ -1166,9 +1166,23 @@ All piecemeal purchases fire red splatter after Google Play confirmation.
 
 ### Subscription Key System
 - Admin generates keys server-side
-- Single use, non-transferable
-- Redeemed in settings under payments section
+- Keys stored in subscription_keys table in database
+- Format: RANDA-XXXX-XXXX-XXXX-XXXX-XXXX-XXXX (X = random alphanumeric uppercase)
+- Single use — marked redeemed after use, never reusable
+- Non-transferable — no cash value
 - Grants 1 month subscription on redemption
+- Redeemed in settings under payments section
+- Redemption endpoint: POST /api/payments/redeem-key
+- Key generation endpoint: POST /api/payments/generate-key (admin only, protected by CRON_SECRET header)
+
+#### subscription_keys table:
+```sql
+id UUID PRIMARY KEY
+key TEXT UNIQUE NOT NULL
+created_at TIMESTAMP DEFAULT NOW()
+redeemed_by UUID REFERENCES users(id)
+redeemed_at TIMESTAMP
+```
 - On dev agenda
 
 ---
