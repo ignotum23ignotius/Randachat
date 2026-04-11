@@ -2,6 +2,7 @@ const express = require('express');
 const router = express.Router();
 const { Pool } = require('pg');
 const authenticate = require('../middleware/auth');
+const { sendToUser } = require('./messages');
 
 const pool = new Pool({ connectionString: process.env.DATABASE_URL });
 
@@ -88,6 +89,8 @@ router.post('/request', authenticate, async (req, res) => {
       [id1, id2, myId]
     );
 
+    sendToUser(user_id, { type: 'friend_request', friendship: result.rows[0] });
+
     return res.status(201).json({
       friendship: result.rows[0],
       mutual: false,
@@ -139,6 +142,8 @@ router.put('/accept/:friendshipId', authenticate, async (req, res) => {
       [friendshipId]
     );
 
+    sendToUser(row.requested_by, { type: 'friend_accepted', friendship: updated.rows[0] });
+
     return res.json({
       friendship: updated.rows[0],
       message: 'Friend request accepted — profile pictures are now visible to each other'
@@ -183,6 +188,8 @@ router.put('/dismiss/:friendshipId', authenticate, async (req, res) => {
     if (row.status === 'accepted') {
       return res.status(400).json({ error: 'Cannot dismiss an accepted friendship' });
     }
+
+    sendToUser(row.requested_by, { type: 'friend_dismissed', friendship_id: friendshipId });
 
     await pool.query('DELETE FROM friends WHERE id = $1', [friendshipId]);
 
