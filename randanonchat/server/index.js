@@ -21,6 +21,11 @@ app.use('/api/matching', require('./routes/matching'));
 app.use('/api/payments', require('./routes/payments'));
 app.use('/api/users',    require('./routes/users'));
 
+// ── Serve landing page + static assets ───────────────────────
+// server/public contains index.html (landing page) and hero.png.
+// Served unconditionally so the landing page works in all envs.
+app.use(express.static(path.join(__dirname, 'public')));
+
 // ── Serve React client build in production ────────────────────
 // Vite outputs to client/dist. Express serves the static assets
 // and falls back to index.html for all non-API routes so React
