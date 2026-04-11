@@ -209,6 +209,29 @@ CREATE TABLE blocked_users (
 );
 
 -- ============================================================
+-- 13. image_blobs
+-- ============================================================
+-- Server stores only encrypted blobs — never plaintext.
+-- Hybrid encryption: encrypted_blob encrypted with a random
+-- symmetric key (crypto_secretbox); sealed_key is that symmetric
+-- key sealed to the recipient's public key (crypto_box_seal).
+-- Expiry and self-destruct scheduling are handled by messages.js.
+CREATE TABLE image_blobs (
+    id            UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+    uploader_id   UUID REFERENCES users(id)  NOT NULL,
+    recipient_id  UUID REFERENCES users(id),           -- NULL for group images
+    group_id      UUID REFERENCES groups(id),           -- NULL for DM images
+    encrypted_blob TEXT NOT NULL,
+    encryption_iv  TEXT NOT NULL,
+    sealed_key     TEXT NOT NULL,
+    created_at     TIMESTAMP DEFAULT NOW(),
+    CHECK (
+        (recipient_id IS NOT NULL AND group_id IS NULL) OR
+        (recipient_id IS NULL     AND group_id IS NOT NULL)
+    )
+);
+
+-- ============================================================
 -- Indexes
 -- ============================================================
 
@@ -268,6 +291,11 @@ CREATE INDEX idx_csam_reports_reviewed ON csam_reports (reviewed) WHERE reviewed
 -- blocked_users: lookup by blocker and blocked
 CREATE INDEX idx_blocked_users_blocker_id ON blocked_users (blocker_id);
 CREATE INDEX idx_blocked_users_blocked_id ON blocked_users (blocked_id);
+
+-- image_blobs: fetch by recipient, group, and uploader
+CREATE INDEX idx_image_blobs_uploader_id  ON image_blobs (uploader_id);
+CREATE INDEX idx_image_blobs_recipient_id ON image_blobs (recipient_id) WHERE recipient_id IS NOT NULL;
+CREATE INDEX idx_image_blobs_group_id     ON image_blobs (group_id)     WHERE group_id     IS NOT NULL;
 
 -- ============================================================
 -- Triggers: auto-update updated_at columns
