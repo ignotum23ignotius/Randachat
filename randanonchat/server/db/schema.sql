@@ -43,6 +43,7 @@ CREATE TABLE users (
     gender_filter       JSONB DEFAULT '["m","f","trans","other"]',
     location_filter     JSONB DEFAULT '["usa","canada","eu","other"]',
     randoms_enabled     BOOLEAN DEFAULT TRUE,
+    push_token          TEXT,
     created_at          TIMESTAMP DEFAULT NOW(),
     updated_at          TIMESTAMP DEFAULT NOW()
 );
@@ -237,6 +238,7 @@ CREATE TABLE image_blobs (
 
 -- users: lookups by username, matching filters, ban checks
 CREATE INDEX idx_users_username        ON users (username);
+CREATE INDEX idx_users_push_token      ON users (push_token) WHERE push_token IS NOT NULL;
 CREATE INDEX idx_users_randoms_enabled ON users (randoms_enabled) WHERE randoms_enabled = TRUE;
 CREATE INDEX idx_users_ban_type        ON users (ban_type) WHERE ban_type != 'none';
 CREATE INDEX idx_users_tier            ON users (tier);
