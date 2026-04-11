@@ -16,7 +16,7 @@
 | 3 | server/routes/messages.js | DELETE /expired protected by authenticate middleware — should be server-side cron, not user-triggered | ✅ Fixed |
 | 4 | server/routes/matching.js | Fallback query orders by partner_id (UUID) not by last message timestamp — least recently seen logic broken | ✅ Fixed |
 | 6 | server/routes/images.js | DELETE endpoint only allows uploader to delete — recipient cannot trigger deletion on self-destruct | ✅ Fixed |
-| 8 | client/src/App.jsx | BrowserRouter missing basename="/app" — routing will break in production since PWA is served at /app/ | ⚠️ Open |
+| 8 | client/src/App.jsx | BrowserRouter missing basename="/app" — routing will break in production since PWA is served at /app/ | ✅ Fixed |
 
 ---
 

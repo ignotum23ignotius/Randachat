@@ -39,7 +39,7 @@ function SettingsPage()  { return <div>Settings</div>; }
 // ── App ───────────────────────────────────────────────────────
 export default function App() {
   return (
-    <BrowserRouter>
+    <BrowserRouter basename="/app">
       <Routes>
         {/* Public routes */}
         <Route path="/signup" element={<SignupPage />} />
