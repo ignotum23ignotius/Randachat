@@ -210,7 +210,18 @@ CREATE TABLE blocked_users (
 );
 
 -- ============================================================
--- 13. image_blobs
+-- 13. subscription_keys
+-- ============================================================
+CREATE TABLE subscription_keys (
+    id          UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+    key         TEXT UNIQUE NOT NULL,
+    created_at  TIMESTAMP DEFAULT NOW(),
+    redeemed_by UUID REFERENCES users(id),
+    redeemed_at TIMESTAMP
+);
+
+-- ============================================================
+-- 14. image_blobs
 -- ============================================================
 -- Server stores only encrypted blobs — never plaintext.
 -- Hybrid encryption: encrypted_blob encrypted with a random
@@ -293,6 +304,9 @@ CREATE INDEX idx_csam_reports_reviewed ON csam_reports (reviewed) WHERE reviewed
 -- blocked_users: lookup by blocker and blocked
 CREATE INDEX idx_blocked_users_blocker_id ON blocked_users (blocker_id);
 CREATE INDEX idx_blocked_users_blocked_id ON blocked_users (blocked_id);
+
+-- subscription_keys: fast lookup by key on redemption
+CREATE INDEX idx_subscription_keys_key ON subscription_keys (key);
 
 -- image_blobs: fetch by recipient, group, and uploader
 CREATE INDEX idx_image_blobs_uploader_id  ON image_blobs (uploader_id);
