@@ -677,3 +677,141 @@ GOOGLE_PLAY_PUBLIC_KEY=<from Play Console>
 - Client only sends "purchase request" to server
 - Server handles all billing privately
 - Suggested license: AGPL-3.0
+
+---
+
+## Design System
+
+### Colors
+- Background base: #1c0626
+- Background mid: #38074f
+- Background light: #491063
+- Accent gold dark: #666106
+- Accent gold mid: #807a1b
+- Accent gold warm: #80591b
+- Accent gold orange: #802f1b
+
+### Fonts (Google Fonts)
+- Display / Headings / Body: Uncial Antiqua
+- UI elements / labels / buttons: IM Fell English
+
+### Animation
+- Ink reveal — text masked, mask sweeps left to right revealing text
+- Triggers per section as it scrolls into view
+- Each section animates independently
+- Slow and deliberate — cryptic feel
+
+### Vibe
+- Dark, moody, secret society
+- Like stumbling onto something you weren't supposed to find
+- Sparse — nothing wasted
+- Gold on deep purple throughout
+
+---
+
+## Landing Page (randanonchat.com — root)
+
+### File Location
+- server/public/index.html
+- Served at / by Express
+- Standalone HTML file — no React, no build step
+
+### Hero Image
+- File: /public/hero.png (the full artwork — daggers, eye, candle, Randachat text)
+- Centered, full width on mobile, max-width 600px on desktop
+
+### Section 1 — Hero
+```
+[Hero image]
+
+They aren't watching here.
+
+A private, encrypted, open-source social network for adults.
+No ads. No trackers. No governments. No AI trying to sell you soap.
+
+[Enter] ← gold button, links to /app
+```
+
+### Section 2 — Features
+```
+🜏 End-to-end encrypted
+Every message. Every image. Every word.
+Unreadable to anyone but you and who you chose.
+
+☽ Open source
+Every line of code is public.
+Trust nothing you can't verify.
+
+⚸ No surveillance
+No ad profiles. No behavioral tracking. No data brokers.
+You are not the product.
+
+🝒 Adult focused
+Built for grown ups. Treated like one.
+```
+
+### Section 3 — How It Works
+```
+Match. Message. Disappear.
+
+Find a random stranger. Talk. Send images that vanish.
+Make a friend if you want one. Invite them somewhere private.
+Leave no trace if you don't.
+```
+
+### Section 4 — Pricing
+```
+Free, forever:
+25 matches a day. 1 group. Endless messages.
+No expiry. No credit card.
+
+A little more, for a little more:
+More matches. More groups. More control.
+Honest prices. No dark patterns.
+
+[$10/month or pay as you go →] ← gold button, links to /app
+```
+
+### Section 5 — Footer
+```
+Privacy Policy · Terms of Service · GitHub ↗ · © 2025 Randachat
+```
+- Privacy Policy links to /privacy
+- Terms of Service links to /tos
+- GitHub links to the public repo (placeholder href for now)
+
+### Styling Rules
+- Full viewport height hero section
+- Each section separated by generous padding
+- Text centered
+- Gold (#807a1b) for headings and accent elements
+- Light gold (#807a1b at 70% opacity) for body text
+- Deep purple gradient background top to bottom (#1c0626 → #38074f)
+- Enter button: gold border, gold text, dark background, no fill — on hover subtle gold glow
+- No images other than hero
+- Mobile first
+
+---
+
+## App UI (/app — React PWA)
+
+### Global App Design Rules
+- Same color system as landing page
+- Same fonts — Uncial Antiqua + IM Fell English
+- Dark backgrounds throughout — never white or light
+- Gold accents for interactive elements
+- Bubble messages: sender gold, recipient purple
+- All screens mobile-first
+- No ink reveal animation inside the app — that is landing page only
+- Subtle fade-in on screen load only
+
+### Pending Design (to be designed screen by screen before building):
+- Signup screen
+- Login screen
+- Inbox screen
+- Chat screen
+- Image editor screen
+- Profile screen
+- Settings screen
+- Groups screen
+- Payments / diamonds screen
