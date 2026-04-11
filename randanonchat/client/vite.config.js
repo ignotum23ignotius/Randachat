@@ -29,7 +29,7 @@ export default defineConfig({
         globPatterns: ['**/*.{js,css,html,ico,png,svg,woff,woff2}'],
         // Return app shell for all navigation requests so React
         // Router works offline.
-        navigateFallback: '/index.html',
+        navigateFallback: '/app/index.html',
         navigateFallbackDenylist: [/^\/api\//]
       },
 

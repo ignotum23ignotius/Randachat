@@ -190,7 +190,7 @@ router.post('/login', async (req, res) => {
       }
 
       const token = jwt.sign(
-        { id: user.id, username: user.username, shadow_banned: true },
+        { id: user.id, username: user.username },
         JWT_SECRET,
         { expiresIn: JWT_EXPIRY }
       );
